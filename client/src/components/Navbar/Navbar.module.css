@@ -1,0 +1,8 @@
+.navbar__title {
+  font-family: "Geraldine";
+  font-size: 30px;
+}
+
+.navbar__item {
+  border-right: 1px #a3a3a3 solid;
+}

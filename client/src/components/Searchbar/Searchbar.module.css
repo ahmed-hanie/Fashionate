@@ -1,0 +1,21 @@
+.container {
+  background-color: white;
+  height: 85px;
+  width: 100%;
+}
+
+/* Hide short text when (resolution > 768 px) */
+.categorybutton__short-text {
+  display: none;
+}
+
+/* When resoltion <= 768px, hide full and show short text */
+@media (max-width: 768px) {
+  .categorybutton__long-text {
+    display: none;
+  }
+
+  .categorybutton__short-text {
+    display: inline-block;
+  }
+}

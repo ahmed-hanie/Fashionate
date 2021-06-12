@@ -29,9 +29,13 @@ router.get("/", async (req, res) => {
       // through: {attributes: []}
       include: [
         Category,
-        { model: Subcategory, through: { attributes: [] } },
+        {
+          model: Subcategory,
+          through: { attributes: [] },
+        },
         { model: Tag, through: { attributes: [] } },
       ],
+      subQuery: false,
     });
 
     res.status(200).json({

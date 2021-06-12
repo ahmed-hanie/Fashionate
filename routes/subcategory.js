@@ -16,13 +16,21 @@ router.get("/", async (req, res) => {
     const limitQuery = search.getLimitQuery();
     const offsetQuery = search.getOffsetQuery();
 
-    // Find subcategories
-    const data = await Subcategory.findAll({
+    let dbQuery = {
       where: whereQuery,
       order: orderQuery,
       limit: limitQuery,
       offset: offsetQuery,
-    });
+    };
+
+    // Are we trying to find subcategories from main categories?
+    // We need to join category/subcategory tables
+    if ("categories.id" in req.query.filter) {
+      dbQuery = { ...dbQuery, include: Category, subQuery: false };
+    }
+
+    // Find subcategories
+    const data = await Subcategory.findAll(dbQuery);
 
     res.status(200).json({
       data,
@@ -101,21 +109,6 @@ router.delete("/:id", async (req, res) => {
     // Delete
     await subcategory.destroy();
     res.status(204).json({});
-  } catch (err) {
-    console.log(err);
-    res.status(500).json(err);
-  }
-});
-
-// Get subcategories by category
-router.get("/category/:id", async (req, res) => {
-  try {
-    const data = await Subcategory.findAll({
-      where: { "$categories.id$": req.params.id },
-      include: Category,
-    });
-
-    res.status(200).json({ data });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

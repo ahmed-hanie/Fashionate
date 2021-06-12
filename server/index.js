@@ -28,18 +28,21 @@ if (process.env.NODE_ENV == "development") {
 
     user.addRole(role);
 
-    const category = await Category.create({ name: "clothes" });
+    const category = await Category.create({ name: "Clothes" });
+    const category1 = await Category.create({ name: "Cltohes 2" });
     const subcategory = await Subcategory.create({ name: "Hoodies" });
     const subcategory1 = await Subcategory.create({ name: "Vests" });
     const tag = await Tag.create({ name: "Sale" });
 
     await category.addSubcategory(subcategory);
+    await category.addSubcategory(subcategory1);
+    await category1.addSubcategory(subcategory);
 
-    const product = await Product.create({ name: "RTX 3090", price: 50 });
+    const product = await Product.create({ name: "Pants", price: 50 });
     await product.setCategory(category);
     await product.addTag(tag);
     await product.addSubcategory(subcategory);
-    const product1 = await Product.create({ name: "RTX 3080", price: 40 });
+    const product1 = await Product.create({ name: "Shirts", price: 40 });
     await product1.setCategory(category);
 
     const order = await Order.create();

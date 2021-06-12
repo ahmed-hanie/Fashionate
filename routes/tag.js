@@ -100,41 +100,4 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Get tags by category
-router.get("/category/:id", async (req, res) => {
-  try {
-    const data = await Tag.findAll({
-      where: { "$products.categoryId$": req.params.id },
-      include: Product,
-    });
-
-    res.status(200).json({ data });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json(err);
-  }
-});
-
-// Get tags by category and subcategory
-router.get(
-  "/category/:categoryid/subcategory/:subcategoryid",
-  async (req, res) => {
-    try {
-      const data = await Tag.findAll({
-        where: {
-          "$products.categoryId$": req.params.categoryid,
-          "$products.subcategories.product_subcategory.subcategoryId$":
-            req.params.subcategoryid,
-        },
-        include: [{ model: Product, include: Subcategory }],
-      });
-
-      res.status(200).json({ data });
-    } catch (err) {
-      console.log(err);
-      res.status(500).json(err);
-    }
-  }
-);
-
 module.exports = router;

@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 
 // API Routes
 const user = require("../routes/user");
@@ -12,6 +13,8 @@ const app = express();
 
 // Parse json
 app.use(express.json());
+// Use cors
+app.use(cors());
 
 app.use("/api/user", user);
 app.use("/api/tag", tag);
