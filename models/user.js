@@ -14,22 +14,35 @@ module.exports = (sequelize, DataTypes) => {
         through: "user_role",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
+        as: "roles",
       });
 
       // One user has many orders
       this.hasMany(models.order);
+
+      // One user has many refresh tokens
+      this.hasMany(models.userToken);
     }
 
     // Find a user by their credentials
     static async findByCredentials(username, password) {
-      const user = await this.findOne({ where: { username: username } });
+      const user = await this.findOne({
+        where: { username: username },
+        include: "roles",
+      });
+      if (!user) return null;
       const isMatch = await bcrypt.compare(password, user.password);
       return isMatch ? user : null;
     }
 
-    // Remove id and password from json output for security purposes
+    // Remove id, password and disabled from json output for security purposes
     toJSON() {
-      return { ...this.get(), id: undefined, password: undefined };
+      return {
+        ...this.get(),
+        id: undefined,
+        password: undefined,
+        disabled: undefined,
+      };
     }
   }
   user.init(

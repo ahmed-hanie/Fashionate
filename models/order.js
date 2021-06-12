@@ -41,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
 
-    // Remove id from json output for security purposes
+    // Remove id, userId from json output for security purposes
     toJSON() {
-      return { ...this.get(), id: undefined };
+      return { ...this.get(), id: undefined, userId: undefined };
     }
   }
   order.init(

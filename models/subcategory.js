@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       // The same subcategory can belong to many products
       this.belongsToMany(models.product, {
         through: "product_subcategory",
-        onDelete: "CASCADE",
+        onDelete: "RESTRICT",
         onUpdate: "CASCADE",
       });
     }
@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
         allowNull: false,
+        unqiue: true,
         validate: {
           notEmpty: { msg: "Name must not be empty" },
         },
