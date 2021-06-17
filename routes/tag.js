@@ -8,6 +8,17 @@ const {
   Sequelize,
 } = require("../models");
 
+// Middlewares
+const auth = require("../middleware/auth");
+const adminAccess = require("../middleware/adminAccess");
+
+/**
+ * @api {get} /tag Request tags
+ * @apiName GetTags
+ * @apiGroup Tag
+ *
+ * @apiSuccess {Object[]} data List of tags
+ **/
 router.get("/", async (req, res) => {
   try {
     // Query builder
@@ -34,6 +45,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /tag/:id Request tag
+ * @apiParam  {Number} id Unique identifier of tag
+ * @apiName GetTag
+ * @apiGroup Tag
+ *
+ * @apiSuccess {id} id Tag id
+ * @apiSuccess {String} name Tag name
+ **/
 router.get("/:id", async (req, res) => {
   try {
     const tag = await Tag.findOne({ where: { id: req.params.id } });
@@ -47,7 +67,17 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+/**
+ * @api {post} /tag/ Create tag
+ * @apiName CreateTag
+ * @apiGroup Tag
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Tag id
+ * @apiSuccess {String} name Tag name
+ **/
+router.post("/", auth, adminAccess, async (req, res) => {
   try {
     // Check if tag exists
     let tag = await Tag.findOne({ where: { name: req.body.name } });
@@ -64,7 +94,18 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+/**
+ * @api {put} /tag/:id Update tag
+ * @apiParam  {Number} id Unique identifier of tag
+ * @apiName UpdateTag
+ * @apiGroup Tag
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Tag id
+ * @apiSuccess {String} name Tag name
+ **/
+router.put("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find tag
     let tag = await Tag.findOne({ where: { id: req.params.id } });
@@ -83,7 +124,15 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+/**
+ * @api {delete} /tag/:id Delete tag
+ * @apiParam  {Number} id Unique identifier of tag
+ * @apiName DeleteTag
+ * @apiGroup Tag
+ *
+ * @apiPermission admin
+ **/
+router.delete("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find tag
     let tag = await Tag.findOne({ where: { id: req.params.id } });

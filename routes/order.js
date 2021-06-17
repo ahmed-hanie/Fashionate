@@ -13,31 +13,36 @@ const {
 // Middlewares
 const auth = require("../middleware/auth");
 
-router.get("/user/:uuid", auth, async (req, res) => {
+/**
+ * @api {get} /order/user Request orders for user
+ * @apiName GetOrder
+ * @apiGroup Order
+ *
+ * @apiPermission user
+ *
+ * @apiSuccess {Object[]} data List of orders
+ **/
+router.get("/user", auth, async (req, res) => {
   try {
-    // Check if user is requesting their orders
-    if (req.user.uuid !== req.params.uuid) {
-      return res.status(401).json({ message: "Unauthorized" });
+    const user = await User.findOne({ where: { uuid: req.user.uuid } });
+
+    let limit = 10;
+    if ("limit" in req.query) {
+      limit = req.query.limit;
     }
 
-    // Query builder
-    const search = new searchBuilder(Sequelize, req.query);
-    const whereQuery = search.getWhereQuery();
-    const orderQuery = search.getOrderQuery();
-    const limitQuery = search.getLimitQuery();
-    const offsetQuery = search.getOffsetQuery();
+    const data = await Order.findAll({ where: { userId: user.id }, limit });
 
-    // Find orders
-    const data = await Order.findAll({
-      where: whereQuery,
-      order: orderQuery,
-      limit: limitQuery,
-      offset: offsetQuery,
-      include: Product,
-    });
+    let jsonData = data.map((item) => item.toJSON());
+    for (let i = 0; i < jsonData.length; i++) {
+      jsonData[i] = {
+        ...jsonData[i],
+        ...(await data[i].getTotalPriceAndQuantity()),
+      };
+    }
 
     res.status(200).json({
-      data,
+      data: jsonData,
     });
   } catch (err) {
     console.log(err);
@@ -45,6 +50,18 @@ router.get("/user/:uuid", auth, async (req, res) => {
   }
 });
 
+/**
+ * @api {post} /order Create Order
+ * @apiName PostOrder
+ * @apiGroup Order
+ *
+ * @apiPermission user
+ *
+ * @apiParam {Object[]} products List of products with quantities
+ *
+ * @apiSuccess {String} uuid Order uuid
+ * @apiSuccess {Object[]} products List of products in order with quantities
+ **/
 router.post("/", auth, async (req, res) => {
   // Create transaction
   const t = await sequelize.transaction();
@@ -66,6 +83,7 @@ router.post("/", auth, async (req, res) => {
           { transaction: t }
         );
       }
+      await t.commit();
     } else {
       // Order without products???
       await t.rollback();

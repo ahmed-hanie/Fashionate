@@ -1,0 +1,33 @@
+.container {
+  border: 1px solid black;
+  border-bottom: none;
+}
+
+.product__container {
+  width: 200px;
+  height: 350px;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.product__container--empty {
+  border-bottom: 1px solid black;
+  border-right: none;
+}
+
+.product__container:nth-child(3) {
+  border-right: 0;
+}
+
+.product__image {
+  width: 200px;
+  height: 200px;
+}
+
+.product__price {
+  color: #4278f5;
+}
+
+.product__link {
+  cursor: pointer;
+}

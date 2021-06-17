@@ -32,6 +32,20 @@ module.exports = (sequelize, DataTypes) => {
       return sum;
     }
 
+    async getTotalPriceAndQuantity() {
+      let totalSum = 0;
+      let totalQty = 0;
+
+      // If products were already fetched, no need to fetch them again
+      const products = this.products ? this.products : await this.getProducts();
+
+      products.forEach((item) => {
+        totalSum += item.price * item.productOrder.quantity;
+        totalQty += item.productOrder.quantity;
+      });
+      return { totalSum, totalQty };
+    }
+
     // Add product with quantity
     async addProductQty(ProductOrder, product, quantity) {
       await ProductOrder.create({

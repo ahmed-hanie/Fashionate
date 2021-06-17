@@ -9,8 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // The same subcategory can belong to many categories
-      this.belongsToMany(models.category, {
-        through: "category_subcategory",
+      this.belongsTo(models.category, {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });

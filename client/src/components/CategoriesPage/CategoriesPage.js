@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import styles from "./CategoriesPage.module.css";
 import { getCategories } from "../../api/category";
 import { getSubcategoriesFromCategory } from "../../api/subcategory";
@@ -31,18 +32,22 @@ const CategoriesPage = (props) => {
     <div className="p-5">
       <h3> Shop All Categories </h3>
       <Row className="mt-3">
-        {categories.map((item, index) => {
+        {categories.map((item, categoryIndex) => {
           const subcategoryParagraphs = item.subcategories.map(
-            (subcategory, index) => {
+            (subcategory, subcategoryIndex) => {
               return (
-                <a href="#" className={`${styles.subcategory} mb-2`}>
+                <Link
+                  to={`/?category=${item.id}&subcategory=${subcategory.id}`}
+                  className={`${styles.subcategory} mb-2`}
+                  key={subcategory.id}
+                >
                   {subcategory.name}
-                </a>
+                </Link>
               );
             }
           );
           return (
-            <Col md={12} lg>
+            <Col md={12} lg key={categoryIndex}>
               <div className={`${styles.card} mb-5`}>
                 <Card>
                   <Card.Body>

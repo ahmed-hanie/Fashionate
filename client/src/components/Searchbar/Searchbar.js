@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { Row, InputGroup, FormControl, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import SearchIcon from "@material-ui/icons/Search";
 import styles from "./Searchbar.module.css";
 
 const Searchbar = () => {
+  const history = useHistory();
+  const [searchTerm, setSearchTerm] = useState("");
+  const onSearchButtonClick = () => {
+    if (searchTerm) {
+      history.push(`/?name=${searchTerm}%`, {
+        from: history.location.pathname,
+      });
+    } else {
+      history.push("/");
+    }
+  };
+  const onSearchTermChange = (ev) => {
+    setSearchTerm(ev.target.value);
+  };
+
   return (
     <Row>
       <div
@@ -28,9 +43,11 @@ const Searchbar = () => {
               placeholder="What are you looking for?"
               size="lg"
               type="text"
+              value={searchTerm}
+              onChange={onSearchTermChange}
             />
             <InputGroup.Append>
-              <Button variant="primary">
+              <Button variant="primary" onClick={onSearchButtonClick}>
                 <SearchIcon />
               </Button>
             </InputGroup.Append>

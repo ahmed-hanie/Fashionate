@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const searchBuilder = require("sequelize-search-builder");
 const router = new express.Router();
 const {
   generateAccessToken,
@@ -16,6 +17,15 @@ const {
 const auth = require("../middleware/auth");
 const adminAccess = require("../middleware/adminAccess");
 
+/**
+ * @api {get} /user Request users
+ * @apiName GetUsers
+ * @apiGroup User
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {Object[]} data List of users
+ **/
 router.get("/", auth, adminAccess, async (req, res) => {
   try {
     // Query builder
@@ -42,6 +52,18 @@ router.get("/", auth, adminAccess, async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /user/:uuid Request user
+ * @apiParam  {String} uuid Unique identifier of user
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {String} uuid User uuid
+ * @apiSuccess {String} username
+ * @apiSuccess {String} email
+ **/
 router.get("/:uuid", auth, adminAccess, async (req, res) => {
   try {
     const user = await User.findOne({
@@ -57,6 +79,16 @@ router.get("/:uuid", auth, adminAccess, async (req, res) => {
   }
 });
 
+/**
+ * @api {put} /user/:uuid/disable Disable user
+ * @apiParam  {String} uuid Unique identifier of user
+ * @apiName DisableUser
+ * @apiGroup User
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {String} message Success informational message
+ **/
 router.put("/:uuid/disable", auth, adminAccess, async (req, res) => {
   try {
     const user = await User.findOne({
@@ -74,8 +106,22 @@ router.put("/:uuid/disable", auth, adminAccess, async (req, res) => {
   }
 });
 
+/**
+ * @api {post} /register Register user
+ * @apiName RegisterUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username
+ * @apiParam {String} password
+ * @apiParam {String} email
+ *
+ *
+ * @apiSuccess {String} uuid User uuid
+ * @apiSuccess {String} username
+ * @apiSuccess {String} email
+ **/
 // Sign up
-router.post("/", async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
     // Create user
     const user = await User.create(req.body);
@@ -93,6 +139,19 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * @api {post} /login Login user
+ * @apiName LoginUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username
+ * @apiParam {String} password
+ *
+ *
+ * @apiSuccess {String} AccessToken JWT token for authenticating user
+ * @apiSuccess {String} RefreshToken JWT token for refreshing access token before expiry
+ * @apiSuccess {Object[]} roles List of account roles
+ **/
 router.post("/login", async (req, res) => {
   try {
     // Check if username/password exist in DB
@@ -123,13 +182,20 @@ router.post("/login", async (req, res) => {
       userId: user.id,
     });
 
-    res.status(200).json({ accessToken, refreshToken });
+    res.status(200).json({ accessToken, refreshToken, roles: user.roles });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
   }
 });
 
+/**
+ * @api {delete} /user Logout user
+ * @apiName LogoutUser
+ * @apiGroup User
+ *
+ * @apiPermission authenticated
+ **/
 router.delete("/logout", auth, async (req, res) => {
   try {
     const token = req.body.token;
@@ -149,8 +215,23 @@ router.delete("/logout", auth, async (req, res) => {
   }
 });
 
+/**
+ * @api {post} /register Register admin user
+ * @apiName RegisterAdminUser
+ * @apiGroup User
+ *
+ * @apiParam {String} username
+ * @apiParam {String} password
+ * @apiParam {String} email
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {String} uuid User uuid
+ * @apiSuccess {String} username
+ * @apiSuccess {String} email
+ **/
 // Add admin account
-router.post("/add", auth, adminAccess, async (req, res) => {
+router.post("/", auth, adminAccess, async (req, res) => {
   try {
     // Create user
     const user = await User.create(req.body);
@@ -168,6 +249,17 @@ router.post("/add", auth, adminAccess, async (req, res) => {
   }
 });
 
+/**
+ * @api {post} /register Refresh access token user
+ * @apiName RefreshTokenUser
+ * @apiGroup User
+ *
+ * @apiParam {String} token Refresh token
+ *
+ * @apiPermission authenticated
+ *
+ * @apiSuccess {String} AccessToken New valid access token
+ **/
 // Refresh access token
 router.post("/token", async (req, res) => {
   try {

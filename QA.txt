@@ -1,0 +1,7 @@
+1 - Why did you choose your solution architecture for the backend?
+
+A: I have chosen to write the application with NodeJS/Express, MySQL and React. The first and most important reason is that there's only one language needed for both backend and frontend development which is Javascript. Javascript is an extremely easy to learn language. Node package manager is also an amazingly useful tool that facilitates package management. Express is highly modular, customizable and includes middleware modules which allow performing additional tasks on request and response. As for the database, I chose a SQL database because I found relations between the database's entities and in order to avoid denormalization of data. As for the frontend, I chose React as it's a framework that I previously have experience with and as such allows for faster and more efficient development.
+
+2 - What do you like and dislike about Node/Javascript compared to other programming languages?
+
+A: Javascript is dynamically and loosely typed, which is bad for application reliability. It's communication with JSON format is extremely easy and this is very handy for web development. It requires no special software or VM such JavaVM to run, it's 100% a cross-platform language. The high availability of plugins/modules/frameworks/scripts makes creating new projects easier. 

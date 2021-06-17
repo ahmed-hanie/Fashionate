@@ -10,6 +10,17 @@ const {
   sequelize,
 } = require("../models");
 
+// Middlewares
+const auth = require("../middleware/auth");
+const adminAccess = require("../middleware/adminAccess");
+
+/**
+ * @api {get} /product Request products
+ * @apiName GetProducts
+ * @apiGroup Product
+ *
+ * @apiSuccess {Object[]} data List of products
+ **/
 router.get("/", async (req, res) => {
   try {
     // Query builder
@@ -38,15 +49,42 @@ router.get("/", async (req, res) => {
       subQuery: false,
     });
 
-    res.status(200).json({
+    const reply = {
       data,
-    });
+    };
+
+    // Pagination Handling
+    if (req.query.limit) {
+      const totalCount = await Product.count({
+        where: whereQuery,
+        include: [Category, Subcategory, Tag],
+      });
+      const page = req.query.offset ? req.query.offset / req.query.limit : 1;
+      const totalPages = Math.floor(totalCount / req.query.limit);
+      reply["has_more"] = page < totalPages ? true : false;
+    }
+
+    res.status(200).json(reply);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
   }
 });
 
+/**
+ * @api {get} /product/:uuid Request product
+ * @apiParam  {String} uuid Unique identifier of product
+ * @apiName GetProduct
+ * @apiGroup Product
+ *
+ * @apiSuccess {String} uuid Product uuid
+ * @apiSuccess {String} description Product description
+ * @apiSuccess {String} name Product name
+ * @apiSuccess {Number} price Product price
+ * @apiSuccess {Number} categoryId Product category identifier
+ * @apiSuccess {Object[]} subcategories Product subcategories
+ * @apiSuccess {Object[]} tags Product tags
+ **/
 router.get("/:uuid", async (req, res) => {
   try {
     const product = await Product.findOne({
@@ -67,7 +105,30 @@ router.get("/:uuid", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+/**
+ * @api {post} /product Create product
+ * @apiName PostProduct
+ * @apiGroup Product
+ *
+ * @apiPermission admin
+ *
+ * @apiParam {String} uuid Product uuid
+ * @apiParam {String} description Product description
+ * @apiParam {String} name Product name
+ * @apiParam {Number} price Product price
+ * @apiParam {Number} categoryId Product category identifier
+ * @apiParam {Object[]} subcategories Product subcategories
+ * @apiParam {Object[]} tags Product tags
+ *
+ * @apiSuccess {String} uuid Product uuid
+ * @apiSuccess {String} description Product description
+ * @apiSuccess {String} name Product name
+ * @apiSuccess {Number} price Product price
+ * @apiSuccess {Number} categoryId Product category identifier
+ * @apiSuccess {Object[]} subcategories Product subcategories
+ * @apiSuccess {Object[]} tags Product tags
+ **/
+router.post("/", auth, adminAccess, async (req, res) => {
   // Create transaction
   const t = await sequelize.transaction();
   try {
@@ -112,7 +173,23 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:uuid", async (req, res) => {
+/**
+ * @api {put} /product/:uuid Update product
+ * @apiParam  {String} uuid Unique identifier of product
+ * @apiName UpdateProduct
+ * @apiGroup Product
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {String} uuid Product uuid
+ * @apiSuccess {String} description Product description
+ * @apiSuccess {String} name Product name
+ * @apiSuccess {Number} price Product price
+ * @apiSuccess {Number} categoryId Product category identifier
+ * @apiSuccess {Object[]} subcategories Product subcategories
+ * @apiSuccess {Object[]} tags Product tags
+ **/
+router.put("/:uuid", auth, adminAccess, async (req, res) => {
   // Create transaction
   const t = await sequelize.transaction();
   try {
@@ -172,7 +249,16 @@ router.put("/:uuid", async (req, res) => {
   }
 });
 
-router.delete("/:uuid", async (req, res) => {
+/**
+ * @api {delete} /product/:uuid Delete product
+ * @apiParam  {String} uuid Unique identifier of product
+ * @apiName DeleteProduct
+ * @apiGroup Product
+ *
+ * @apiPermission admin
+ *
+ **/
+router.delete("/:uuid", auth, adminAccess, async (req, res) => {
   try {
     // Find product
     let product = await Product.findOne({ where: { uuid: req.params.uuid } });

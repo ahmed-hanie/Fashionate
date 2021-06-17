@@ -7,6 +7,17 @@ const {
   Sequelize,
 } = require("../models");
 
+// Middlewares
+const auth = require("../middleware/auth");
+const adminAccess = require("../middleware/adminAccess");
+
+/**
+ * @api {get} /subcategory Request subcategories
+ * @apiName GetSubcategories
+ * @apiGroup Subcategory
+ *
+ * @apiSuccess {Object[]} data List of subcategories
+ **/
 router.get("/", async (req, res) => {
   try {
     // Query builder
@@ -25,7 +36,7 @@ router.get("/", async (req, res) => {
 
     // Are we trying to find subcategories from main categories?
     // We need to join category/subcategory tables
-    if ("categories.id" in req.query.filter) {
+    if (req.query.filter && "categories.id" in req.query.filter) {
       dbQuery = { ...dbQuery, include: Category, subQuery: false };
     }
 
@@ -41,6 +52,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /subcategory/:id Request subcategory
+ * @apiParam  {Number} id Unique identifier of subcategory
+ * @apiName GetSubcategory
+ * @apiGroup Subcategory
+ *
+ * @apiSuccess {id} id Subcategory id
+ * @apiSuccess {String} name Subcategory name
+ **/
 router.get("/:id", async (req, res) => {
   try {
     const subcategory = await Subcategory.findOne({
@@ -56,7 +76,17 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+/**
+ * @api {post} /subcategory/ Create subcategory
+ * @apiName CreateSubcategory
+ * @apiGroup Subcategory
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Subcategory id
+ * @apiSuccess {String} name Subcategory name
+ **/
+router.post("/", auth, adminAccess, async (req, res) => {
   try {
     // Check if subcategory exists
     let subcategory = await Subcategory.findOne({
@@ -75,7 +105,18 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+/**
+ * @api {put} /subcategory/:id Update subcategory
+ * @apiParam  {Number} id Unique identifier of subcategory
+ * @apiName UpdateSubcategory
+ * @apiGroup Subcategory
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Subcategory id
+ * @apiSuccess {String} name Subcategory name
+ **/
+router.put("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find subcategory
     let subcategory = await Subcategory.findOne({
@@ -96,7 +137,15 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+/**
+ * @api {delete} /subcategory/:id Delete subcategory
+ * @apiParam  {Number} id Unique identifier of subcategory
+ * @apiName DeleteSubcategory
+ * @apiGroup Subcategory
+ *
+ * @apiPermission admin
+ **/
+router.delete("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find tag
     let subcategory = await Subcategory.findOne({

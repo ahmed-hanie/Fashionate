@@ -1,0 +1,10 @@
+.item {
+  border-width: medium;
+  border-style: dashed;
+  border-color: grey;
+  border-radius: 10px;
+}
+
+.container {
+  width: 100%;
+}

@@ -1,8 +1,23 @@
 const express = require("express");
 const router = new express.Router();
 const searchBuilder = require("sequelize-search-builder");
-const { category: Category, Sequelize } = require("../models");
+const {
+  category: Category,
+  subcategory: Subcategory,
+  Sequelize,
+} = require("../models");
 
+// Middlewares
+const auth = require("../middleware/auth");
+const adminAccess = require("../middleware/adminAccess");
+
+/**
+ * @api {get} /category Request categories
+ * @apiName GetCategories
+ * @apiGroup Category
+ *
+ * @apiSuccess {Object[]} data List of categories
+ **/
 router.get("/", async (req, res) => {
   try {
     // Query builder
@@ -12,13 +27,20 @@ router.get("/", async (req, res) => {
     const limitQuery = search.getLimitQuery();
     const offsetQuery = search.getOffsetQuery();
 
-    // Find categories
-    const data = await Category.findAll({
+    let query = {
       where: whereQuery,
       order: orderQuery,
       limit: limitQuery,
       offset: offsetQuery,
-    });
+    };
+
+    // Include subcategories with main category
+    if (req.query.include && req.query.include === "subcategory") {
+      query = { ...query, include: Subcategory };
+    }
+
+    // Find categories
+    const data = await Category.findAll(query);
 
     res.status(200).json({
       data,
@@ -29,6 +51,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /category/:id Request category
+ * @apiParam  {Number} id Unique identifier of category
+ * @apiName GetCategory
+ * @apiGroup Category
+ *
+ * @apiSuccess {id} id Category id
+ * @apiSuccess {String} name Category name
+ **/
 router.get("/:id", async (req, res) => {
   try {
     const category = await Category.findOne({ where: { id: req.params.id } });
@@ -42,13 +73,28 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+/**
+ * @api {post} /category/ Create category
+ * @apiName CreateCategory
+ * @apiGroup Category
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Category id
+ * @apiSuccess {String} name Category name
+ **/
+router.post("/", auth, adminAccess, async (req, res) => {
   try {
     // Check if category exists
     let category = await Category.findOne({ where: { name: req.body.name } });
     if (!category) {
       // Create category
       category = await Category.create(req.body);
+
+      // Add subcategories
+      if (req.body.subcategories) {
+        await category.addSubcategories(req.body.subcategories);
+      }
       res.status(200).json(category);
     } else {
       res.status(400).json({ message: "Resource already exists" });
@@ -59,7 +105,18 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+/**
+ * @api {put} /category/:id Update category
+ * @apiParam  {Number} id Unique identifier of category
+ * @apiName UpdateCategory
+ * @apiGroup Category
+ *
+ * @apiPermission admin
+ *
+ * @apiSuccess {id} id Category id
+ * @apiSuccess {String} name Category name
+ **/
+router.put("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find category
     let category = await Category.findOne({ where: { id: req.params.id } });
@@ -67,9 +124,13 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ message: "Resource not found" });
     }
 
+    console.log(req.body);
+
     // Update
     category.name = req.body.name;
     await category.save();
+    await category.removeSubcategories(await category.getSubcategories());
+    await category.addSubcategories(req.body.subcategories);
 
     res.status(200).json(category);
   } catch (err) {
@@ -78,7 +139,15 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+/**
+ * @api {delete} /category/:id Delete category
+ * @apiParam  {Number} id Unique identifier of category
+ * @apiName DeleteCategory
+ * @apiGroup Category
+ *
+ * @apiPermission admin
+ **/
+router.delete("/:id", auth, adminAccess, async (req, res) => {
   try {
     // Find category
     let category = await Category.findOne({ where: { id: req.params.id } });

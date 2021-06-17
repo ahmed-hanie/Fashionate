@@ -1,0 +1,15 @@
+.subcategoriesSelect {
+  width: 300px;
+}
+
+.subcategoryItem {
+  border-radius: 10px;
+  border: 1px solid black;
+  font-size: 20px;
+}
+
+.subcategoryItem:hover {
+  border-color: red;
+  color: red;
+  cursor: pointer;
+}

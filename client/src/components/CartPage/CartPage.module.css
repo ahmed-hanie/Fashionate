@@ -1,0 +1,17 @@
+.arrowshidden input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.arrowshidden input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.errorText {
+  color: red;
+}
+
+.successDiv {
+  height: 300px;
+}

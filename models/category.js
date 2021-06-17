@@ -16,8 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // One category has many subcategories
-      this.belongsToMany(models.subcategory, {
-        through: "category_subcategory",
+      this.hasMany(models.subcategory, {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });

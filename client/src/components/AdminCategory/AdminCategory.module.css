@@ -1,0 +1,11 @@
+.createButton {
+  height: 40px;
+}
+
+.errorText {
+  color: red;
+}
+
+.infoText {
+  color: green;
+}
