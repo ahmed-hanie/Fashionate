@@ -12,10 +12,11 @@
 - Source code for task
 - ERD Diagram
 - Questions answers text file
+- REST API Documentation available at apidoc/index.html
 
 ### Backend Development
 
-Requires a mariadb server running. Create necessary config files from .example files in config folder.
+Requires MariaDB server running. Create necessary config files from .example files in config folder.
 
 Start backend server with the following command:
 
@@ -29,4 +30,10 @@ Start frontend development server with the following command:
 
 ```
 npm start
+```
+
+### Generate REST API Docs command
+
+```
+npx apidoc -i ..\fashionate\ -o apidoc/ -e node_modules client
 ```
