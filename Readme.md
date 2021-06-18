@@ -37,3 +37,16 @@ npm start
 ```
 npx apidoc -i ..\fashionate\ -o apidoc/ -e node_modules client
 ```
+
+### Testing/Evaluation hosted server:
+
+```
+http://fashionate.hopto.org:3000/
+```
+
+Dummy Accounts:
+
+- account: user1, password: user1234
+- account: admin1, password: admin1234
+
+Note: This server is hosted on my personal computer and as such I cannot host it indefinitely. It will be taken down after 24-6-2021.
